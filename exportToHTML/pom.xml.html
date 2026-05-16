@@ -1,0 +1,150 @@
+<html>
+<head>
+<title>pom.xml</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #d5b778;}
+.s1 { color: #bcbec4;}
+.s2 { color: #6aab73;}
+.s3 { color: #bcbec4;}
+.s4 { color: #7a7e85;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+pom.xml</font>
+</center></td></tr></table>
+<pre><span class="s0">&lt;?</span><span class="s1">xml version</span><span class="s2">=&quot;1.0&quot; </span><span class="s1">encoding</span><span class="s2">=&quot;UTF-8&quot;</span><span class="s0">?&gt;</span>
+<span class="s0">&lt;project </span><span class="s1">xmlns</span><span class="s2">=&quot;http://maven.apache.org/POM/4.0.0&quot;</span>
+         <span class="s1">xmlns:xsi</span><span class="s2">=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>
+         <span class="s1">xsi:schemaLocation</span><span class="s2">=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span><span class="s0">&gt;</span>
+    <span class="s0">&lt;modelVersion&gt;</span><span class="s3">4.0.0</span><span class="s0">&lt;/modelVersion&gt;</span>
+
+    <span class="s0">&lt;groupId&gt;</span><span class="s3">za.co.wethinkcode</span><span class="s0">&lt;/groupId&gt;</span>
+    <span class="s0">&lt;artifactId&gt;</span><span class="s3">robot-world</span><span class="s0">&lt;/artifactId&gt;</span>
+    <span class="s0">&lt;version&gt;</span><span class="s3">0.0.2</span><span class="s0">&lt;/version&gt;</span>
+    <span class="s0">&lt;packaging&gt;</span><span class="s3">jar</span><span class="s0">&lt;/packaging&gt;</span>
+
+    <span class="s0">&lt;properties&gt;</span>
+        <span class="s0">&lt;maven.compiler.target&gt;</span><span class="s3">21</span><span class="s0">&lt;/maven.compiler.target&gt;</span>
+        <span class="s0">&lt;maven.compiler.source&gt;</span><span class="s3">21</span><span class="s0">&lt;/maven.compiler.source&gt;</span>
+        <span class="s0">&lt;project.build.sourceEncoding&gt;</span><span class="s3">UTF-8</span><span class="s0">&lt;/project.build.sourceEncoding&gt;</span>
+        <span class="s0">&lt;version.flow&gt;</span><span class="s3">1.0.2</span><span class="s0">&lt;/version.flow&gt;</span>
+        <span class="s0">&lt;version.jackson&gt;</span><span class="s3">2.13.4.2</span><span class="s0">&lt;/version.jackson&gt;</span>
+        <span class="s0">&lt;version.junit&gt;</span><span class="s3">5.6.3</span><span class="s0">&lt;/version.junit&gt;</span>
+        <span class="s0">&lt;version.mockito&gt;</span><span class="s3">3.6.28</span><span class="s0">&lt;/version.mockito&gt;</span>
+        <span class="s0">&lt;version.picocli&gt;</span><span class="s3">4.6.1</span><span class="s0">&lt;/version.picocli&gt;</span>
+        <span class="s0">&lt;version.slf4j&gt;</span><span class="s3">2.0.17</span><span class="s0">&lt;/version.slf4j&gt;</span>
+        <span class="s0">&lt;version.surefire&gt;</span><span class="s3">2.22.1</span><span class="s0">&lt;/version.surefire&gt;</span>
+    <span class="s0">&lt;/properties&gt;</span>
+
+    <span class="s0">&lt;dependencies&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">com.fasterxml.jackson.core</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">jackson-databind</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">${version.jackson}</span><span class="s0">&lt;/version&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">org.junit.jupiter</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">junit-jupiter-engine</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">${version.junit}</span><span class="s0">&lt;/version&gt;</span>
+            <span class="s0">&lt;scope&gt;</span><span class="s3">test</span><span class="s0">&lt;/scope&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">org.junit.jupiter</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">junit-jupiter-api</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">${version.junit}</span><span class="s0">&lt;/version&gt;</span>
+            <span class="s0">&lt;scope&gt;</span><span class="s3">test</span><span class="s0">&lt;/scope&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">org.mockito</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">mockito-core</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">${version.mockito}</span><span class="s0">&lt;/version&gt;</span>
+            <span class="s0">&lt;scope&gt;</span><span class="s3">test</span><span class="s0">&lt;/scope&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">info.picocli</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">picocli</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">${version.picocli}</span><span class="s0">&lt;/version&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s4">&lt;!-- The following 2 dependencies are REQUIRED to enable `flow`. --&gt;</span>
+        <span class="s4">&lt;!-- DO NOT REMOVE THEM. --&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">za.co.wethinkcode</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">flow</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">${version.flow}</span><span class="s0">&lt;/version&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">org.slf4j</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">slf4j-nop</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">${version.slf4j}</span><span class="s0">&lt;/version&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">junit</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">junit</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">4.13.2</span><span class="s0">&lt;/version&gt;</span>
+            <span class="s0">&lt;scope&gt;</span><span class="s3">test</span><span class="s0">&lt;/scope&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">org.json</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">json</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">20250107</span><span class="s0">&lt;/version&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+        <span class="s0">&lt;dependency&gt;</span>
+            <span class="s0">&lt;groupId&gt;</span><span class="s3">org.xerial</span><span class="s0">&lt;/groupId&gt;</span>
+            <span class="s0">&lt;artifactId&gt;</span><span class="s3">sqlite-jdbc</span><span class="s0">&lt;/artifactId&gt;</span>
+            <span class="s0">&lt;version&gt;</span><span class="s3">3.36.0.3</span><span class="s0">&lt;/version&gt;</span>
+        <span class="s0">&lt;/dependency&gt;</span>
+
+    <span class="s0">&lt;/dependencies&gt;</span>
+
+    <span class="s0">&lt;build&gt;</span>
+        <span class="s0">&lt;plugins&gt;</span>
+            <span class="s0">&lt;plugin&gt;</span>
+                <span class="s0">&lt;groupId&gt;</span><span class="s3">org.apache.maven.plugins</span><span class="s0">&lt;/groupId&gt;</span>
+                <span class="s0">&lt;artifactId&gt;</span><span class="s3">maven-surefire-plugin</span><span class="s0">&lt;/artifactId&gt;</span>
+                <span class="s0">&lt;version&gt;</span><span class="s3">3.0.0-M5</span><span class="s0">&lt;/version&gt;</span>
+                <span class="s0">&lt;configuration&gt;</span>
+                    <span class="s4">&lt;!-- Use JUnit Platform (JUnit 5) --&gt;</span>
+                    <span class="s0">&lt;useModulePath&gt;</span><span class="s3">false</span><span class="s0">&lt;/useModulePath&gt;</span>
+                    <span class="s4">&lt;!-- Explicitly exclude tests in the iteration2 acceptance package so CLI patterns can't accidentally include them --&gt;</span>
+                    <span class="s0">&lt;excludes&gt;</span>
+                        <span class="s4">&lt;!-- exclude any test classes under the acceptance/iteration2 package --&gt;</span>
+                        <span class="s0">&lt;exclude&gt;</span><span class="s3">**/za/co/wethinkcode/robots/acceptance/iteration2/**/*</span><span class="s0">&lt;/exclude&gt;</span>
+                    <span class="s0">&lt;/excludes&gt;</span>
+                <span class="s0">&lt;/configuration&gt;</span>
+            <span class="s0">&lt;/plugin&gt;</span>
+            <span class="s4">&lt;!-- Add assembly plugin to create an executable jar-with-dependencies --&gt;</span>
+            <span class="s0">&lt;plugin&gt;</span>
+                <span class="s0">&lt;groupId&gt;</span><span class="s3">org.apache.maven.plugins</span><span class="s0">&lt;/groupId&gt;</span>
+                <span class="s0">&lt;artifactId&gt;</span><span class="s3">maven-assembly-plugin</span><span class="s0">&lt;/artifactId&gt;</span>
+                <span class="s0">&lt;version&gt;</span><span class="s3">3.3.0</span><span class="s0">&lt;/version&gt;</span>
+                <span class="s0">&lt;configuration&gt;</span>
+                    <span class="s0">&lt;archive&gt;</span>
+                        <span class="s0">&lt;manifest&gt;</span>
+                            <span class="s0">&lt;mainClass&gt;</span><span class="s3">za.co.wethinkcode.robots.server.Server</span><span class="s0">&lt;/mainClass&gt;</span>
+                        <span class="s0">&lt;/manifest&gt;</span>
+                    <span class="s0">&lt;/archive&gt;</span>
+                    <span class="s0">&lt;descriptorRefs&gt;</span>
+                        <span class="s0">&lt;descriptorRef&gt;</span><span class="s3">jar-with-dependencies</span><span class="s0">&lt;/descriptorRef&gt;</span>
+                    <span class="s0">&lt;/descriptorRefs&gt;</span>
+                <span class="s0">&lt;/configuration&gt;</span>
+                <span class="s0">&lt;executions&gt;</span>
+                    <span class="s0">&lt;execution&gt;</span>
+                        <span class="s0">&lt;id&gt;</span><span class="s3">make-assembly</span><span class="s0">&lt;/id&gt;</span>
+                        <span class="s0">&lt;phase&gt;</span><span class="s3">package</span><span class="s0">&lt;/phase&gt;</span>
+                        <span class="s0">&lt;goals&gt;</span>
+                            <span class="s0">&lt;goal&gt;</span><span class="s3">single</span><span class="s0">&lt;/goal&gt;</span>
+                        <span class="s0">&lt;/goals&gt;</span>
+                    <span class="s0">&lt;/execution&gt;</span>
+                <span class="s0">&lt;/executions&gt;</span>
+            <span class="s0">&lt;/plugin&gt;</span>
+        <span class="s0">&lt;/plugins&gt;</span>
+    <span class="s0">&lt;/build&gt;</span>
+
+<span class="s0">&lt;/project&gt;</span>
+</pre>
+</body>
+</html>

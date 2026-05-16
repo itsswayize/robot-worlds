@@ -1,0 +1,159 @@
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #56a8f5;}
+.s4 { color: #c77dbb; font-style: italic;}
+.s5 { color: #6aab73;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+README.md</font>
+</center></td></tr></table>
+<pre><span class="s0"># </span><span class="s2">🤖 RobotWorld</span>
+
+<span class="s0">## </span><span class="s2">🌎 Brief Overview </span>
+
+<span class="s2">RobotWorld is a game-like simulation where users launch robots into an alien world. Robots move and interact within a shared environment filled with obstacles. Each robot can move, turn, shoot, repair itself, and reload—actions controlled by a set of commands that keep everything running smoothly. The world keeps track of robot and obstacle positions, what each robot can see, and how they affect each other during the game.</span>
+
+<span class="s2">The main parts of the project include the Robot class, which defines how each robot behaves and what it can do; the World class, which manages the environment and all the robots; and the CommandHandler, which takes care of processing and executing the commands. There’s also a system for obstacles and visibility that influences movement and interactions.</span>
+
+<span class="s0">---</span>
+
+<span class="s0">## </span><span class="s2">🚀 Getting Started</span>
+<span class="s2">This project is a `Java` project using `maven` as the build tool.</span>
+
+<span class="s0">### </span><span class="s2">📦 3rd Party Dependencies  </span>
+<span class="s0">- </span><span class="s1">[</span><span class="s2">🧩 JSON </span><span class="s1">(</span><span class="s2">org.json</span><span class="s1">)](</span><span class="s3">https://mvnrepository.com/artifact/org.json/json</span><span class="s1">) </span><span class="s2">– Used for creating and parsing responses</span>
+
+
+<span class="s0">### </span><span class="s2">🛠 Installing `maven`  </span>
+
+<span class="s2">Install `maven` using your favorite package manager</span><span class="s1">:</span>
+
+<span class="s0">#### </span><span class="s2">🍏 macOS </span><span class="s1">(</span><span class="s2">Using </span><span class="s1">[</span><span class="s2">Homebrew</span><span class="s1">](</span><span class="s3">https://brew.sh</span><span class="s1">))</span>
+
+<span class="s0">1. </span><span class="s2">Install</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">brew install maven</span>
+   <span class="s0">```</span>
+
+<span class="s0">2. </span><span class="s2">Verify Installation</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">mvn -v</span>
+   <span class="s0">```</span>
+
+<span class="s0">#### </span><span class="s2">🐧 Linux</span>
+
+<span class="s0">##### </span><span class="s2">🐧 Ubuntu/Debian-based</span>
+
+<span class="s0">1. </span><span class="s2">Install</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">sudo apt update &amp;&amp; sudo apt install maven</span>
+   <span class="s0">```</span>
+
+<span class="s0">2. </span><span class="s2">Verify Installation</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">mvn -v</span>
+   <span class="s0">```</span>
+
+<span class="s0">#### </span><span class="s2">🪟 Windows </span><span class="s1">(</span><span class="s2">Using </span><span class="s1">[</span><span class="s2">Scoop</span><span class="s1">](</span><span class="s3">https://scoop.sh</span><span class="s1">))</span>
+
+<span class="s0">1. </span><span class="s2">Install</span><span class="s1">:</span>
+   <span class="s0">- </span><span class="s2">Open PowerShell as Administrator  </span>
+   <span class="s0">- </span><span class="s2">Run</span><span class="s1">:  </span>
+     <span class="s0">```</span><span class="s4">powershell</span>
+     <span class="s5">scoop install maven</span>
+     <span class="s0">```</span>
+
+<span class="s0">2. </span><span class="s2">Verify Installation</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">mvn -v</span>
+   <span class="s0">```</span>
+
+<span class="s0">### </span><span class="s2">🌐 Getting Local IP Address </span><span class="s1">(</span><span class="s2">Wi-Fi</span><span class="s1">) **</span><span class="s2">Needed for running RobotClient</span><span class="s1">**</span>
+
+<span class="s0">- </span><span class="s1">*</span><span class="s2">Note 1</span><span class="s1">*: </span><span class="s2">Run these commands on the machine that will be the server</span>
+<span class="s0">- </span><span class="s1">*</span><span class="s2">Note 2</span><span class="s1">*: </span><span class="s2">The client and server need to be on the same local network for it to work</span>
+
+<span class="s0">#### </span><span class="s2">🍏 macOS</span>
+<span class="s0">#### </span><span class="s2">Via Terminal</span><span class="s1">:</span>
+<span class="s0">```</span><span class="s4">bash</span>
+<span class="s5">ipconfig getifaddr en0</span>
+<span class="s5">$ Output (e.g.): 192.168.4.31 </span>
+<span class="s0">```</span>
+
+
+<span class="s0">### </span><span class="s2">🪟 Windows</span>
+<span class="s0">#### </span><span class="s2">Via Command Prompt </span><span class="s1">(</span><span class="s2">CMD</span><span class="s1">):</span>
+<span class="s0">```</span><span class="s4">cmd</span>
+<span class="s5">for /f &quot;tokens=14&quot; %a in ('ipconfig ^| findstr &quot;IPv4&quot;') do @echo %a</span>
+<span class="s5">$ Output (e.g.): 192.168.4.31 </span>
+
+<span class="s0">```</span>
+
+<span class="s0">### </span><span class="s2">🐧 Linux</span>
+<span class="s0">#### </span><span class="s2">Via Terminal</span><span class="s1">:</span>
+
+<span class="s0">```</span><span class="s4">bash</span>
+<span class="s5">hostname -I</span>
+<span class="s5">$ Output (e.g.): 192.168.4.31 </span>
+<span class="s0">```</span>
+<span class="s0">- </span><span class="s2">Returns all assigned IPs. The first is usually your local IP.</span>
+
+<span class="s0">### </span><span class="s2">🏗 Building the RobotServer from CLI </span>
+
+<span class="s0">1. </span><span class="s2">Clone the </span><span class="s1">[</span><span class="s2">📁 repository</span><span class="s1">](</span><span class="s3">https://gitlab.wethinkco.de/kumangajhb024/oop-ex-toy-robot-group</span><span class="s1">)  </span>
+<span class="s0">2. </span><span class="s2">Navigate to the root folder</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">cd &lt;your-cloned-folder&gt;</span>
+   <span class="s0">```</span>
+<span class="s0">3. </span><span class="s2">Clean and compile</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">mvn clean compile</span>
+   <span class="s0">```</span>
+<span class="s0">4. </span><span class="s2">Build and run the RobotServer</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">mvn exec:java -Dexec.mainClass=&quot;za.co.wethinkcode.robots.server.Server&quot;</span>
+   <span class="s0">```</span>
+<span class="s0">5. </span><span class="s2">Enter a port number when prompted </span><span class="s1">(</span><span class="s2">e.g. `3000`</span><span class="s1">)</span>
+
+
+<span class="s0">### </span><span class="s2">🏗 Building a RobotClient from CLI</span>
+
+<span class="s0">1. </span><span class="s2">Clone the </span><span class="s1">[</span><span class="s2">📁 repository</span><span class="s1">](</span><span class="s3">https://gitlab.wethinkco.de/kumangajhb024/oop-ex-toy-robot-group</span><span class="s1">)  </span>
+<span class="s0">2. </span><span class="s2">Navigate to the root folder</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">cd &lt;your-cloned-folder&gt;</span>
+   <span class="s0">```</span>
+<span class="s0">3. </span><span class="s2">Clean and compile</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">mvn clean compile</span>
+   <span class="s0">```</span>
+<span class="s0">4. </span><span class="s2">Build and run the RobotServer</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+  	<span class="s5">mvn exec:java -Dexec.mainClass=&quot;za.co.wethinkcode.robots.client.ClientApp&quot;</span>
+   <span class="s0">```</span>
+<span class="s0">5. </span><span class="s2">Enter a IP address of the server </span><span class="s1">(</span><span class="s2">e.g. `192.168.4.31`</span><span class="s1">)</span>
+<span class="s0">6. </span><span class="s2">Enter the port number of the server </span><span class="s1">(</span><span class="s2">e.g. `3000`</span><span class="s1">)</span>
+
+<span class="s0">### </span><span class="s2">✅ Running Unit Tests</span>
+<span class="s0">1. </span><span class="s2">Clone the </span><span class="s1">[</span><span class="s2">📁 repository</span><span class="s1">](</span><span class="s3">https://gitlab.wethinkco.de/kumangajhb024/oop-ex-toy-robot-group</span><span class="s1">)  </span>
+<span class="s0">2. </span><span class="s2">Navigate to the root folder</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">cd &lt;your-cloned-folder&gt;</span>
+   <span class="s0">```</span>
+<span class="s0">3. </span><span class="s2">Test</span><span class="s1">:  </span>
+   <span class="s0">```</span><span class="s4">bash</span>
+   <span class="s5">mvn test</span>
+   <span class="s0">```</span>
+</pre>
+</body>
+</html>

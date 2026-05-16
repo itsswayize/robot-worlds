@@ -1,0 +1,223 @@
+<html>
+<head>
+<title>Makefile</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #7a7e85;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #cf8e6d;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Makefile</font>
+</center></td></tr></table>
+<pre><span class="s0"># Makefile for Robot Worlds 
+# NOTE: Run this Makefile from a POSIX-like shell (bash). 
+</span><span class="s1">SHELL </span><span class="s2">:= </span><span class="s1">/usr/bin/env bash</span>
+
+<span class="s1">ROOT </span><span class="s2">:= </span><span class="s3">$</span><span class="s2">(</span><span class="s1">CURDIR</span><span class="s2">)</span>
+<span class="s1">REF_JAR </span><span class="s2">:= </span><span class="s3">$</span><span class="s2">(</span><span class="s1">ROOT</span><span class="s2">)</span><span class="s1">/lib/reference-server-0.2.3.jar</span>
+<span class="s1">REF_JAR2 </span><span class="s2">:= </span><span class="s3">$</span><span class="s2">(</span><span class="s1">ROOT</span><span class="s2">)</span><span class="s1">/lib/reference-server-0.1.0.jar</span>
+<span class="s1">JAR_PATTERN </span><span class="s2">:= </span><span class="s1">target/*-jar-with-dependencies.jar</span>
+
+<span class="s1">.PHONY</span><span class="s2">: </span><span class="s1">deps package build start-ref stop-ref start-local stop-local </span><span class="s3">\ 
+    </span><span class="s1">iteration2-local-launch iteration2-ref-launch iteration2-ref-look iteration2-local-look </span><span class="s3">\ 
+    </span><span class="s1">ref-all-except-iteration2 local-all-except-iteration2 full-orchestrated</span>
+
+<span class="s0"># ----------------------------- 
+# Basic build helpers 
+# ----------------------------- 
+</span><span class="s1">deps</span><span class="s2">:</span>
+	<span class="s1">@echo &quot;Resolving dependencies with Maven...&quot;</span>
+	<span class="s1">@mvn dependency</span><span class="s2">:</span><span class="s1">purge-local-repository -DactTransitively</span><span class="s2">=</span><span class="s1">false</span>
+	<span class="s1">@mvn -q dependency</span><span class="s2">:</span><span class="s1">resolve</span>
+
+<span class="s1">package</span><span class="s2">:</span>
+	<span class="s1">@echo &quot;Building fat jar </span><span class="s2">(</span><span class="s1">skip tests</span><span class="s2">)</span><span class="s1">&quot;</span>
+	<span class="s1">@mvn -DskipTests package</span>
+
+<span class="s1">build</span><span class="s2">: </span><span class="s1">deps package</span>
+
+<span class="s0"># ----------------------------- 
+# Reference server control (v0.2.3) 
+# ----------------------------- 
+</span><span class="s1">start-ref</span><span class="s2">:</span>
+	<span class="s1">@if [ ! -f &quot;</span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_JAR</span><span class="s2">)</span><span class="s1">&quot; ]</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Reference server jar not found at </span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_JAR</span><span class="s2">)</span><span class="s1">&quot;</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@echo &quot;Checking for existing listener on port 5000...&quot;</span>
+	<span class="s1">@EXIST_PID</span><span class="s2">=</span><span class="s3">$$</span><span class="s2">(</span><span class="s1">ss -ltnp 2&gt;/dev/null </span><span class="s2">| </span><span class="s1">awk '/</span><span class="s2">:</span><span class="s1">5000/ </span><span class="s2">{ </span><span class="s1">gsub</span><span class="s2">(</span><span class="s1">/.*pid</span><span class="s2">=</span><span class="s1">/,&quot;&quot;,</span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">); </span><span class="s1">gsub</span><span class="s2">(</span><span class="s1">/,.*/,&quot;&quot;,</span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">); </span><span class="s1">print </span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">; </span><span class="s1">exit </span><span class="s2">}</span><span class="s1">'</span><span class="s2">); </span><span class="s3">\ 
+    </span><span class="s1">if [ -n &quot;</span><span class="s3">$$</span><span class="s1">EXIST_PID&quot; ]</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Port 5000 already in use by PID </span><span class="s3">$$</span><span class="s1">EXIST_PID</span><span class="s2">; </span><span class="s1">killing it to free port...&quot;</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">kill -9 </span><span class="s3">$$</span><span class="s1">EXIST_PID 2&gt;/dev/null </span><span class="s2">|| </span><span class="s1">true</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">sleep 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@echo &quot;Starting reference server </span><span class="s2">(</span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_JAR</span><span class="s2">)) </span><span class="s1">with args</span><span class="s2">: </span><span class="s1">'</span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_ARGS</span><span class="s2">)</span><span class="s1">'</span><span class="s2">; </span><span class="s1">logging to .ref.log&quot;</span>
+	<span class="s1">@nohup java -jar &quot;</span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_JAR</span><span class="s2">)</span><span class="s1">&quot; </span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_ARGS</span><span class="s2">) </span><span class="s1">&gt; .ref.log 2&gt;&amp;1 &amp; echo </span><span class="s3">$$</span><span class="s1">! &gt; .ref.pid</span>
+	<span class="s1">@echo &quot;Waiting up to 15s for reference server to accept connections on port 5000...&quot;</span>
+	<span class="s1">@i</span><span class="s2">=</span><span class="s1">0</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">while ! nc -z localhost 5000 2&gt;/dev/null</span><span class="s2">; </span><span class="s1">do </span><span class="s3">\ 
+        </span><span class="s1">sleep 1</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">i</span><span class="s2">=</span><span class="s3">$$</span><span class="s2">((</span><span class="s1">i+1</span><span class="s2">)); </span><span class="s3">\ 
+        </span><span class="s1">if [ </span><span class="s3">$$</span><span class="s1">i -ge 15 ]</span><span class="s2">; </span><span class="s1">then break</span><span class="s2">; </span><span class="s1">fi</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">done</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">if ! nc -z localhost 5000 2&gt;/dev/null</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Reference server failed to accept connections on port 5000 after 15s&quot;</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;--- .ref.log </span><span class="s2">(</span><span class="s1">last 200 lines</span><span class="s2">) </span><span class="s1">---&quot;</span><span class="s2">; </span><span class="s1">tail -n 200 .ref.log</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@echo &quot;Reference server PID</span><span class="s2">: </span><span class="s3">$$</span><span class="s2">(</span><span class="s1">cat .ref.pid</span><span class="s2">) (</span><span class="s1">logs</span><span class="s2">: </span><span class="s1">.ref.log</span><span class="s2">)</span><span class="s1">&quot;</span>
+
+<span class="s0"># ----------------------------- 
+# Reference server control (v0.1.0) 
+# ----------------------------- 
+</span><span class="s1">start-ref2</span><span class="s2">:</span>
+	<span class="s1">@if [ ! -f &quot;</span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_JAR2</span><span class="s2">)</span><span class="s1">&quot; ]</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Reference server jar not found at </span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_JAR2</span><span class="s2">)</span><span class="s1">&quot;</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@echo &quot;Checking for existing listener on port 5000...&quot;</span>
+	<span class="s1">@EXIST_PID</span><span class="s2">=</span><span class="s3">$$</span><span class="s2">(</span><span class="s1">ss -ltnp 2&gt;/dev/null </span><span class="s2">| </span><span class="s1">awk '/</span><span class="s2">:</span><span class="s1">5000/ </span><span class="s2">{ </span><span class="s1">gsub</span><span class="s2">(</span><span class="s1">/.*pid</span><span class="s2">=</span><span class="s1">/,&quot;&quot;,</span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">); </span><span class="s1">gsub</span><span class="s2">(</span><span class="s1">/,.*/,&quot;&quot;,</span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">); </span><span class="s1">print </span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">; </span><span class="s1">exit </span><span class="s2">}</span><span class="s1">'</span><span class="s2">); </span><span class="s3">\ 
+    </span><span class="s1">if [ -n &quot;</span><span class="s3">$$</span><span class="s1">EXIST_PID&quot; ]</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Port 5000 already in use by PID </span><span class="s3">$$</span><span class="s1">EXIST_PID</span><span class="s2">; </span><span class="s1">killing it to free port...&quot;</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">kill -9 </span><span class="s3">$$</span><span class="s1">EXIST_PID 2&gt;/dev/null </span><span class="s2">|| </span><span class="s1">true</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">sleep 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@echo &quot;Starting reference server </span><span class="s2">(</span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_JAR2</span><span class="s2">)) </span><span class="s1">with args</span><span class="s2">: </span><span class="s1">'</span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_ARGS</span><span class="s2">)</span><span class="s1">'</span><span class="s2">; </span><span class="s1">logging to .ref.log&quot;</span>
+	<span class="s1">@nohup java -jar &quot;</span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_JAR2</span><span class="s2">)</span><span class="s1">&quot; </span><span class="s3">$</span><span class="s2">(</span><span class="s1">REF_ARGS</span><span class="s2">) </span><span class="s1">&gt; .ref.log 2&gt;&amp;1 &amp; echo </span><span class="s3">$$</span><span class="s1">! &gt; .ref.pid</span>
+	<span class="s1">@echo &quot;Waiting up to 15s for reference server to accept connections on port 5000...&quot;</span>
+	<span class="s1">@i</span><span class="s2">=</span><span class="s1">0</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">while ! nc -z localhost 5000 2&gt;/dev/null</span><span class="s2">; </span><span class="s1">do </span><span class="s3">\ 
+        </span><span class="s1">sleep 1</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">i</span><span class="s2">=</span><span class="s3">$$</span><span class="s2">((</span><span class="s1">i+1</span><span class="s2">)); </span><span class="s3">\ 
+        </span><span class="s1">if [ </span><span class="s3">$$</span><span class="s1">i -ge 15 ]</span><span class="s2">; </span><span class="s1">then break</span><span class="s2">; </span><span class="s1">fi</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">done</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">if ! nc -z localhost 5000 2&gt;/dev/null</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Reference server failed to accept connections on port 5000 after 15s&quot;</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;--- .ref.log </span><span class="s2">(</span><span class="s1">last 200 lines</span><span class="s2">) </span><span class="s1">---&quot;</span><span class="s2">; </span><span class="s1">tail -n 200 .ref.log</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@echo &quot;Reference server PID</span><span class="s2">: </span><span class="s3">$$</span><span class="s2">(</span><span class="s1">cat .ref.pid</span><span class="s2">) (</span><span class="s1">logs</span><span class="s2">: </span><span class="s1">.ref.log</span><span class="s2">)</span><span class="s1">&quot;</span>
+
+<span class="s1">stop-ref</span><span class="s2">:</span>
+	<span class="s1">@echo &quot;Stopping reference server </span><span class="s2">(</span><span class="s1">if running</span><span class="s2">)</span><span class="s1">&quot;</span>
+	<span class="s1">@test -f .ref.pid &amp;&amp; kill </span><span class="s3">$$</span><span class="s2">(</span><span class="s1">cat .ref.pid</span><span class="s2">) </span><span class="s1">2&gt;/dev/null </span><span class="s2">|| </span><span class="s1">true</span>
+	<span class="s1">@rm -f .ref.pid </span><span class="s2">|| </span><span class="s1">true</span>
+	<span class="s1">@echo &quot;Reference log</span><span class="s2">: </span><span class="s1">.ref.log&quot;</span>
+
+<span class="s0"># ----------------------------- 
+# Local server control (built jar) 
+# ----------------------------- 
+</span><span class="s1">start-local</span><span class="s2">:</span>
+	<span class="s1">@JAR</span><span class="s2">=</span><span class="s3">$$</span><span class="s2">(</span><span class="s1">ls </span><span class="s3">$</span><span class="s2">(</span><span class="s1">JAR_PATTERN</span><span class="s2">) </span><span class="s1">2&gt;/dev/null </span><span class="s2">| </span><span class="s1">head -n1 </span><span class="s2">|| </span><span class="s1">true</span><span class="s2">); </span><span class="s3">\ 
+    </span><span class="s1">if [ -z &quot;</span><span class="s3">$$</span><span class="s1">JAR&quot; ]</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Built jar not found, running make package...&quot;</span><span class="s2">; </span><span class="s3">\ 
+        $</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">package</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">JAR</span><span class="s2">=</span><span class="s3">$$</span><span class="s2">(</span><span class="s1">ls </span><span class="s3">$</span><span class="s2">(</span><span class="s1">JAR_PATTERN</span><span class="s2">) | </span><span class="s1">head -n1</span><span class="s2">); </span><span class="s3">\ 
+    </span><span class="s1">fi</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">EXIST_PID</span><span class="s2">=</span><span class="s3">$$</span><span class="s2">(</span><span class="s1">ss -ltnp 2&gt;/dev/null </span><span class="s2">| </span><span class="s1">awk '/</span><span class="s2">:</span><span class="s1">5000/ </span><span class="s2">{ </span><span class="s1">gsub</span><span class="s2">(</span><span class="s1">/.*pid</span><span class="s2">=</span><span class="s1">/,&quot;&quot;,</span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">); </span><span class="s1">gsub</span><span class="s2">(</span><span class="s1">/,.*/,&quot;&quot;,</span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">); </span><span class="s1">print </span><span class="s3">$$</span><span class="s1">NF</span><span class="s2">; </span><span class="s1">exit </span><span class="s2">}</span><span class="s1">'</span><span class="s2">); </span><span class="s3">\ 
+    </span><span class="s1">if [ -n &quot;</span><span class="s3">$$</span><span class="s1">EXIST_PID&quot; ]</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Port 5000 already in use by PID </span><span class="s3">$$</span><span class="s1">EXIST_PID</span><span class="s2">; </span><span class="s1">killing it to free port...&quot;</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">kill -9 </span><span class="s3">$$</span><span class="s1">EXIST_PID 2&gt;/dev/null </span><span class="s2">|| </span><span class="s1">true</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">sleep 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">if [ -z &quot;</span><span class="s3">$</span><span class="s2">(</span><span class="s1">LOCAL_ARGS</span><span class="s2">)</span><span class="s1">&quot; ]</span><span class="s2">; </span><span class="s1">then ARGS</span><span class="s2">=</span><span class="s1">&quot;&quot;</span><span class="s2">; </span><span class="s3">else </span><span class="s1">ARGS</span><span class="s2">=</span><span class="s1">&quot;</span><span class="s3">$</span><span class="s2">(</span><span class="s1">LOCAL_ARGS</span><span class="s2">)</span><span class="s1">&quot;</span><span class="s2">; </span><span class="s1">fi</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">echo &quot;Starting local server </span><span class="s2">(</span><span class="s3">$$</span><span class="s1">JAR</span><span class="s2">) </span><span class="s1">with args</span><span class="s2">: </span><span class="s1">'</span><span class="s3">$$</span><span class="s1">ARGS' </span><span class="s2">(</span><span class="s1">logs</span><span class="s2">: </span><span class="s1">.local.log</span><span class="s2">)</span><span class="s1">&quot;</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">nohup java -jar &quot;</span><span class="s3">$$</span><span class="s1">JAR&quot; </span><span class="s3">$$</span><span class="s1">ARGS &gt; .local.log 2&gt;&amp;1 &amp; echo </span><span class="s3">$$</span><span class="s1">! &gt; .local.pid</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">@echo &quot;Waiting up to 15s for local server to accept connections on port 5000...&quot;</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">i</span><span class="s2">=</span><span class="s1">0</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">while ! nc -z localhost 5000 2&gt;/dev/null</span><span class="s2">; </span><span class="s1">do </span><span class="s3">\ 
+        </span><span class="s1">sleep 1</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">i</span><span class="s2">=</span><span class="s3">$$</span><span class="s2">((</span><span class="s1">i+1</span><span class="s2">)); </span><span class="s3">\ 
+        </span><span class="s1">if [ </span><span class="s3">$$</span><span class="s1">i -ge 15 ]</span><span class="s2">; </span><span class="s1">then break</span><span class="s2">; </span><span class="s1">fi</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">done</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">if ! nc -z localhost 5000 2&gt;/dev/null</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;Local server failed to accept connections on port 5000 after 15s&quot;</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">echo &quot;--- .local.log </span><span class="s2">(</span><span class="s1">last 200 lines</span><span class="s2">) </span><span class="s1">---&quot;</span><span class="s2">; </span><span class="s1">tail -n 200 .local.log</span><span class="s2">; </span><span class="s3">\ 
+        </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">echo &quot;Local server PID</span><span class="s2">: </span><span class="s3">$$</span><span class="s2">(</span><span class="s1">cat .local.pid</span><span class="s2">) (</span><span class="s1">logs</span><span class="s2">: </span><span class="s1">.local.log</span><span class="s2">)</span><span class="s1">&quot;</span>
+
+<span class="s1">stop-local</span><span class="s2">:</span>
+	<span class="s1">@echo &quot;Stopping local server </span><span class="s2">(</span><span class="s1">if running</span><span class="s2">)</span><span class="s1">&quot;</span>
+	<span class="s1">@test -f .local.pid &amp;&amp; kill </span><span class="s3">$$</span><span class="s2">(</span><span class="s1">cat .local.pid</span><span class="s2">) </span><span class="s1">2&gt;/dev/null </span><span class="s2">|| </span><span class="s1">true</span>
+	<span class="s1">@rm -f .local.pid </span><span class="s2">|| </span><span class="s1">true</span>
+	<span class="s1">@echo &quot;Local log</span><span class="s2">: </span><span class="s1">.local.log&quot;</span>
+
+<span class="s0"># ----------------------------- 
+# Orchestrated test sequences 
+# ----------------------------- 
+</span>
+<span class="s1">iteration2-local-launch</span><span class="s2">:</span>
+	<span class="s1">@echo &quot;Starting local server with -p 5000 -s 2 -o 1,1 and running LaunchRobot tests...&quot;</span>
+	<span class="s1">@</span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">LOCAL_ARGS</span><span class="s2">=</span><span class="s1">&quot;-p 5000 -s 2 -o 1,1&quot; start-local</span>
+	<span class="s1">@echo &quot;Running LaunchRobot tests against local server...&quot;</span>
+	<span class="s1">@if ! mvn -Dtest</span><span class="s2">=</span><span class="s1">za.co.wethinkcode.robots.acceptance.iteration2.LaunchRobot test</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        $</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-local</span><span class="s2">; </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@</span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-local</span>
+
+<span class="s1">iteration2-ref-launch</span><span class="s2">:</span>
+	<span class="s1">@REF_ARGS</span><span class="s2">=</span><span class="s1">&quot;-p 5000 -s 2 -o 1,1&quot; </span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">start-ref</span>
+	<span class="s1">@echo &quot;Running LaunchRobot tests against reference server...&quot;</span>
+	<span class="s1">@if ! mvn -Dtest</span><span class="s2">=</span><span class="s1">za.co.wethinkcode.robots.acceptance.iteration2.LaunchRobot test</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        $</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-ref</span><span class="s2">; </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@</span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-ref</span>
+
+<span class="s1">iteration2-ref-look</span><span class="s2">:</span>
+	<span class="s1">@REF_ARGS</span><span class="s2">=</span><span class="s1">&quot;-p 5000 -s 2 -o 0,1&quot; </span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">start-ref</span>
+	<span class="s1">@echo &quot;Running Look test against reference server </span><span class="s2">(</span><span class="s1">obstacle at 0,1</span><span class="s2">)</span><span class="s1">...&quot;</span>
+	<span class="s1">@if ! mvn -Dtest</span><span class="s2">=</span><span class="s1">za.co.wethinkcode.robots.acceptance.iteration2.Look test</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        $</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-ref</span><span class="s2">; </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@</span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-ref</span>
+
+<span class="s1">iteration2-local-look</span><span class="s2">:</span>
+	<span class="s1">@echo &quot;Starting local server with -p 5000 -s 2 -o 0,1 and running Look test...&quot;</span>
+	<span class="s1">@</span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">LOCAL_ARGS</span><span class="s2">=</span><span class="s1">&quot;-p 5000 -s 2 -o 0,1&quot; start-local</span>
+	<span class="s1">@echo &quot;Running Look test against local server </span><span class="s2">(</span><span class="s1">obstacle at 0,1</span><span class="s2">)</span><span class="s1">...&quot;</span>
+	<span class="s1">@if ! mvn -Dtest</span><span class="s2">=</span><span class="s1">za.co.wethinkcode.robots.acceptance.iteration2.Look test</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        $</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-local</span><span class="s2">; </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@</span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-local</span>
+
+<span class="s0"># ----------------------------- 
+# Run all tests except iteration2 
+# ----------------------------- 
+</span>
+<span class="s1">ref-all-except-iteration2</span><span class="s2">:</span>
+	<span class="s1">@REF_ARGS</span><span class="s2">=</span><span class="s1">&quot;-p 5000 -s 1&quot; </span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">start-ref2</span>
+	<span class="s1">@echo &quot;Running all tests against reference server excluding iteration2 package...&quot;</span>
+	<span class="s1">@if ! mvn test -DexcludedTests</span><span class="s2">=</span><span class="s1">&quot;**/acceptance/iteration2/**&quot;</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        $</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-ref</span><span class="s2">; </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@</span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-ref</span>
+
+<span class="s1">local-all-except-iteration2</span><span class="s2">:</span>
+	<span class="s1">@LOCAL_ARGS</span><span class="s2">=</span><span class="s1">&quot;-p 5000 -s 1&quot; </span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">start-local</span>
+	<span class="s1">@echo &quot;Running all tests against local server excluding iteration2 package...&quot;</span>
+	<span class="s1">@if ! mvn test -DexcludedTests</span><span class="s2">=</span><span class="s1">&quot;za/co/wethinkcode/robots/acceptance/iteration2/**/*Test.java&quot;</span><span class="s2">; </span><span class="s1">then </span><span class="s3">\ 
+        $</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-local</span><span class="s2">; </span><span class="s1">exit 1</span><span class="s2">; </span><span class="s3">\ 
+    </span><span class="s1">fi</span>
+	<span class="s1">@</span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">stop-local</span>
+
+<span class="s0"># ----------------------------- 
+# Full orchestrated flow 
+# ----------------------------- 
+</span><span class="s1">test</span><span class="s2">: </span><span class="s1">iteration2-local-launch iteration2-ref-launch iteration2-ref-look iteration2-local-look ref-all-except-iteration2 local-all-except-iteration2</span>
+	<span class="s1">@echo &quot;Full orchestration complete.&quot;</span>
+
+<span class="s0"># Backwards compat 
+</span><span class="s1">start-ref-default</span><span class="s2">:</span>
+	<span class="s1">@REF_ARGS</span><span class="s2">=</span><span class="s1">&quot;-p 5000 -s 2 -o none&quot; </span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">start-ref</span>
+
+<span class="s1">start-local-default</span><span class="s2">:</span>
+	<span class="s1">@LOCAL_ARGS</span><span class="s2">=</span><span class="s1">&quot;-p 5000 -s 2 -o none&quot; </span><span class="s3">$</span><span class="s2">(</span><span class="s1">MAKE</span><span class="s2">) </span><span class="s1">start-local</span></pre>
+</body>
+</html>

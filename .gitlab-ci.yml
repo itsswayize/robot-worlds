@@ -1,0 +1,146 @@
+stages:
+  - compile
+  - unittest
+  - acceptance
+  - package
+  - docker
+
+
+# -------------------------------
+# Global Variables
+# -------------------------------
+variables:
+  CI_MODE: "true"                            # disables port-check logic in Makefile
+  WTC_EMAIL: "cli@example.com"   # required by the flow library
+
+# -------------------------------
+# Before all jobs
+# -------------------------------
+before_script:
+  - echo "Installing required build tools (make, netcat)"
+  - apt-get update -qq && apt-get install -y -qq make netcat-openbsd
+  - git config --global user.email "$WTC_EMAIL"
+  - git config --global user.name "WTC Student CI"
+  - export WTC_EMAIL="$WTC_EMAIL"
+
+# -------------------------------
+# 1. Compile Stage
+# -------------------------------
+compile:
+  stage: compile
+  image: maven:3.9.9-eclipse-temurin-21
+  script:
+    - mvn install:install-file -Dfile=./eodsql.jar -DgroupId=net.lemnik -DartifactId=eodsql -Dversion=2.2 -Dpackaging=jar -DgeneratePom=true
+    - echo "Compiling project..."
+    - mvn -B compile
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 hour
+
+# -------------------------------
+# 2. Unit Test Stage
+# -------------------------------
+unit_tests:
+  stage: unittest
+  image: maven:3.9.9-eclipse-temurin-21
+  script:
+    - mvn install:install-file -Dfile=./eodsql.jar -DgroupId=net.lemnik -DartifactId=eodsql -Dversion=2.2 -Dpackaging=jar -DgeneratePom=true
+    - echo "Running unit tests (excluding iteration2)..."
+    - make ref-all-except-iteration2
+    - make local-all-except-iteration2
+  artifacts:
+    when: always
+    paths:
+      - .ref.log
+      - .local.log
+      - target/surefire-reports/
+    expire_in: 1 day
+
+# -------------------------------
+# 3. Acceptance Test Stage
+# -------------------------------
+acceptance_tests:
+  stage: acceptance
+  image: maven:3.9.9-eclipse-temurin-21
+  script:
+    - mvn install:install-file -Dfile=./eodsql.jar -DgroupId=net.lemnik -DartifactId=eodsql -Dversion=2.2 -Dpackaging=jar -DgeneratePom=true
+    - echo "Running acceptance tests (iteration2)..."
+    - make iteration2-local-launch
+    - make iteration2-ref-launch
+    - make iteration2-ref-look
+    - make iteration2-local-look
+  artifacts:
+    when: always
+    paths:
+      - .ref.log
+      - .local.log
+      - target/surefire-reports/
+    expire_in: 2 days
+
+# -------------------------------
+# 4. Package Stage
+# -------------------------------
+package_job:
+  stage: package
+  image: maven:3.9.9-eclipse-temurin-21
+  script:
+    - mvn install:install-file -Dfile=./eodsql.jar -DgroupId=net.lemnik -DartifactId=eodsql -Dversion=2.2 -Dpackaging=jar -DgeneratePom=true
+    - echo "Packaging project (skip tests)..."
+    - mvn -DskipTests package
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 hour
+
+.docker_base:
+  image: docker:latest
+  services:
+    - name: docker:dind
+      # Explicitly disable TLS in the service command to ensure it listens on 2375
+      command: ["--tls=false"]
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+    # THIS IS THE MISSING PIECE:
+    DOCKER_HOST: tcp://docker:2375
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+
+# Build and push an image using the packaged jar
+# Only publish images on main and tags to keep registry clean
+.docker_rules:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+    - when: never
+      #test again
+
+docker_build:
+  stage: docker
+  extends: [.docker_base, .docker_rules]
+  needs:
+    - job: package_job
+      artifacts: true
+  script:
+    - IMAGE_NAME="$CI_REGISTRY_IMAGE/robotworld:$CI_COMMIT_SHA"
+    # We don't need to 'cp' or generate a Dockerfile anymore.
+    # Docker will simply use the Dockerfile in your repo and find the target/ folder from artifacts.
+    - docker build -t "$IMAGE_NAME" .
+    - docker push "$IMAGE_NAME"
+
+# Pull and smoke-test the pushed image
+docker_test:
+  stage: docker
+  extends: [.docker_base, .docker_rules]
+  needs:
+    - job: docker_build
+  script:
+    - IMAGE_NAME="$CI_REGISTRY_IMAGE/robotworld:$CI_COMMIT_SHA"
+    - docker pull "$IMAGE_NAME"
+    # Don't start the Java ENTRYPOINT; just verify the jar exists inside the image
+    - docker run --rm --entrypoint /bin/sh "$IMAGE_NAME" -c 'ls -l /app.jar && test -s /app.jar'

@@ -1,0 +1,12 @@
+_version = 1.0
+
+[brn-ex-iteration-4]
+activity_id = "brn-ex-iteration-4"
+
+[team]
+members = [
+    "ntsibiscjc025@student.wethinkcode.co.za",
+    "kataukocjc025@student.wethinkcode.co.za",
+    "logumedjhb024@student.wethinkcode.co.za",
+    "alshumbcjc025@student.wethinkcode.co.za"
+]
